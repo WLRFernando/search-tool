@@ -1,0 +1,11 @@
+Metadata-Version: 1.1
+Name: search-tool
+Version: 1.0.0
+Summary: Replacement for grep
+Home-page: UNKNOWN
+Author: Lahiru Fernando
+Author-email: wlrfernando@outlook.com
+License: UNKNOWN
+Description: Replacement for grep
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3

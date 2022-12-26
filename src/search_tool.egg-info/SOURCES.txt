@@ -1,0 +1,8 @@
+README.md
+setup.py
+scripts/search-tool
+src/search_tool.egg-info/PKG-INFO
+src/search_tool.egg-info/SOURCES.txt
+src/search_tool.egg-info/dependency_links.txt
+src/search_tool.egg-info/top_level.txt
+src/searchcli/__init__.py
