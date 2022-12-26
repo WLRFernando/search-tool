@@ -6,7 +6,7 @@ setup(
     description="Replacement for grep",
     long_description="Replacement for grep",
     version="1.0.0",
-    url="",
+    url="https://github.com/WLRFernando/search-tool",
     author="Lahiru Fernando",
     author_email="wlrfernando@outlook.com",
     scripts=["scripts/search-tool"],

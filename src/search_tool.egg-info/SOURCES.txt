@@ -1,6 +1,8 @@
 README.md
 setup.py
 scripts/search-tool
+src/dataobjects/__init__.py
+src/dataobjects/results.py
 src/search_tool.egg-info/PKG-INFO
 src/search_tool.egg-info/SOURCES.txt
 src/search_tool.egg-info/dependency_links.txt
