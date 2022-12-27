@@ -1,2 +1,1 @@
-dataobjects
 searchcli

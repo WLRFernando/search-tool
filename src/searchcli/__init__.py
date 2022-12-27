@@ -1,5 +1,7 @@
 import argparse
 from dataclasses import dataclass
+import os
+import subprocess
 import sys
 import re
 
@@ -13,31 +15,88 @@ class ResultObject:
     line: str
     match: str
 
+    #Function to get the out put of the saved result
     def output(self):
-        out="Line {:<8} : {} \n"
-        sys.stdout.write(out.format(self.line_no, highlight(self.match, self.line)))
+        sys.stdout.write("Line {} : \n".format(self.line_no))
+        sys.stdout.write(highlight(self.match, self.line))
         return "Line {:<8} : {} \n".format(self.line_no,self.line)
+
 
 def main():
     parser = argparse.ArgumentParser(description="A replacement for grep.")
     parser.add_argument("pattern", type=str, help="the pattern to search for")
+    parser.add_argument("-f", "--file", type=str, help="file path")
+    parser.add_argument("-v", dest="invert", default=False, 
+                        action="store_true", help="invert matches")
     args = parser.parse_args()
-    regex = re.compile(args.pattern)
-    count=0
-    for line in sys.stdin:
-        match = regex.search(line)
-        count+=1
-        if regex.search(line):          
-            result_object=ResultObject(count,line,match)
-            results_arr.append(result_object)
-            # result_object.output()
+    no_of_results=0
 
-    printResult()
+    if not args.pattern:
+        parser.print_help()
+        return
 
-def printResult():
-    for result in results_arr:
+    if not args.file and not sys.stdin:
+        sys.stdout.write("\033[31m!!! Please specify the file or stdin \n\033[0m")
+        parser.print_help()
+        return
+
+    if not args.file:
+        no_of_results=searchAction(sys.stdin, args.pattern, args.invert)
+
+    elif args.file == ".":
+        # grep_search = subprocess.check_output("grep -R '{}' . | awk -F : '{}' ".format(
+        #                                         args.pattern,"{print $2}"), shell=True)
+        # f = open("/tmp/temp.txt", "w")
+        # f.write(str(grep_search))
+        # f.close()
+        # file=open("/tmp/temp.txt","r")
+
+        # no_of_results=searchAction(file, args.pattern, args.invert)
+        for path, dirs, files in os.walk(os.getcwd()):
+            for filename in files:
+                fullpath = os.path.join(path, filename)
+                with open(fullpath, 'r') as f:
+                    try: 
+                        no_of_results=searchAction(f, args.pattern, args.invert)
+                        #TODO - Optimize recursive search
+                    except:
+                        pass               
+                
+    else:
+
+        file=open(args.file,"r")
+        no_of_results=searchAction(file, args.pattern, args.invert)
+
+
+    sys.stdout.write("Search Pattern: \033[31m{} \033[0m \nNo. of Results: {} \n\n".format(args.pattern, no_of_results))
+    printResult(results_arr)
+
+
+#Print Every single results saved in the array
+def printResult(arr):
+    for result in arr:
         result.output()
 
+#General serach function 
+def searchAction(file, pattern, invert):
+    regex = re.compile(pattern)
+    count=0
+    no_of_results=0
+    for line in file:
+        if line in ['\n', '\r\n']:
+            continue
+        match = regex.search(line)
+        count+=1
+        # if regex.search(line):
+        if invert != bool(regex.search(line)): 
+            no_of_results+=1         
+            result_object=ResultObject(count,line,match)
+            results_arr.append(result_object)
+    
+    return no_of_results #return no of results found during the search
+
+#Text highlight function for stdout 
+#Optional function which make result of the search more readable
 def highlight(match, line):
     if not match or not sys.stdout.isatty():
         return line
@@ -48,8 +107,6 @@ def highlight(match, line):
         + line[match.end():])
 
 
-
-
-
+#Invoking main function when called by the package name
 if __name__ == "__main__":
     main()
