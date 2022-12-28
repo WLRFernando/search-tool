@@ -1,7 +1,7 @@
 import argparse
 from dataclasses import dataclass
+import math
 import os
-import subprocess
 import sys
 import re
 
@@ -28,6 +28,8 @@ def main():
     parser.add_argument("-f", "--file", type=str, help="file path")
     parser.add_argument("-v", dest="invert", default=False, 
                         action="store_true", help="invert matches")
+    parser.add_argument("--max-count", "-m", type=int,
+        default=math.inf, help="max number of matches to print")
     args = parser.parse_args()
     no_of_results=0
 
@@ -44,14 +46,6 @@ def main():
         no_of_results=searchAction(sys.stdin, args.pattern, args.invert)
 
     elif args.file == ".":
-        # grep_search = subprocess.check_output("grep -R '{}' . | awk -F : '{}' ".format(
-        #                                         args.pattern,"{print $2}"), shell=True)
-        # f = open("/tmp/temp.txt", "w")
-        # f.write(str(grep_search))
-        # f.close()
-        # file=open("/tmp/temp.txt","r")
-
-        # no_of_results=searchAction(file, args.pattern, args.invert)
         for path, dirs, files in os.walk(os.getcwd()):
             for filename in files:
                 fullpath = os.path.join(path, filename)
@@ -69,13 +63,17 @@ def main():
 
 
     sys.stdout.write("Search Pattern: \033[31m{} \033[0m \nNo. of Results: {} \n\n".format(args.pattern, no_of_results))
-    printResult(results_arr)
+    printResult(results_arr, args.max_count)
 
 
 #Print Every single results saved in the array
-def printResult(arr):
+def printResult(arr, count):
+    matches = 0
     for result in arr:
+        matches += 1
         result.output()
+        if matches >= count:
+            break
 
 #General serach function 
 def searchAction(file, pattern, invert):
@@ -83,10 +81,11 @@ def searchAction(file, pattern, invert):
     count=0
     no_of_results=0
     for line in file:
+        count+=1
         if line in ['\n', '\r\n']:
             continue
         match = regex.search(line)
-        count+=1
+        
         # if regex.search(line):
         if invert != bool(regex.search(line)): 
             no_of_results+=1         
